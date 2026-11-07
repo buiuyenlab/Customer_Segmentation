@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Phân khúc khách hàng thẻ tín dụng</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--tx:#151a22;--mut:#5f6978;--bd:#e1e5eb;--ac:#2f5bea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f131a;--card:#171d27;--tx:#e8ebf1;--mut:#9aa4b5;--bd:#293241;--ac:#86a2ff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f131a;--card:#171d27;--tx:#e8ebf1;--mut:#9aa4b5;--bd:#293241;--ac:#86a2ff;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:1080px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:0 0 2px}h2{font-size:15px;margin:0 0 12px}
+.sub{color:var(--mut);margin:0 0 18px;font-size:13px}
+.g{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:860px){.g{grid-template-columns:360px 1fr}}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px}
+.f{margin-bottom:12px}.f label{display:flex;justify-content:space-between;font-size:13px;color:var(--mut);margin-bottom:4px}
+.f input[type=number]{width:104px;font:inherit;padding:3px 6px;border:1px solid var(--bd);border-radius:7px;background:var(--bg);color:var(--tx);text-align:right}
+.f input[type=range]{width:100%;accent-color:var(--ac)}
+.pr{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+button{font:inherit;font-size:12.5px;padding:5px 10px;border:1px solid var(--bd);border-radius:999px;background:var(--bg);color:var(--tx);cursor:pointer}
+button:hover{border-color:var(--ac)}
+.res{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:620px){.res{grid-template-columns:1fr 1fr}}
+.b{border-radius:12px;padding:12px 14px;border:1px solid var(--bd);border-left-width:5px}
+.b small{color:var(--mut);display:block;font-size:12px}.b strong{font-size:16px;display:block;margin:2px 0}
+.b p{margin:4px 0 0;font-size:13px;color:var(--mut)}
+.pb{display:flex;align-items:center;gap:8px;font-size:12px;margin:3px 0}.pb span:first-child{width:108px;color:var(--mut)}
+.pb i{flex:1;height:7px;border-radius:4px;background:var(--bd);overflow:hidden}.pb i b{display:block;height:100%}
+.pb span:last-child{width:40px;text-align:right}
+.tag{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;margin:10px 0 0;border:1px solid var(--bd)}
+.ch{overflow-x:auto}svg{width:100%;height:auto;display:block;min-width:360px}
+.sg{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-top:6px}
+.sc{border:1px solid var(--bd);border-top-width:4px;border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--mut)}
+.sc.on{outline:2px solid var(--ac)}.sc strong{display:block;color:var(--tx);font-size:14px}
+.t{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px}td,th{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:right}th:first-child,td:first-child{text-align:left}
+.n{font-size:12.5px;color:var(--mut);margin-top:10px}
+</style></head><body><div class="w">
+<h1>Phân khúc khách hàng thẻ tín dụng</h1>
+<p class="sub">Mô hình K-Means và GMM (K=5) huấn luyện trên <span id="nn"></span> khách hàng · tiền xử lý: winsorize 1–99%, log1p, chuẩn hóa, PCA 6 thành phần. Mọi tính toán chạy ngay trên trình duyệt.</p>
+<div class="g">
+<div class="c"><h2>Thông tin khách hàng</h2>
+<div class="pr" id="pr"></div><div id="inp"></div></div>
+<div style="display:grid;gap:16px">
+<div class="c"><h2>Kết quả phân khúc</h2><div class="res" id="res"></div><div id="ag"></div></div>
+<div class="c ch"><h2>Vị trí trên mặt phẳng PC1–PC2</h2><div id="sv"></div>
+<div class="n">Chấm mờ là mẫu 240 khách hàng, màu theo cụm K-Means; vòng tròn lớn là khách hàng đang nhập.</div></div>
+</div></div>
+<div class="c" style="margin-top:16px"><h2>Năm phân khúc (K-Means)</h2><div class="sg" id="sg"></div></div>
+<div class="c t" style="margin-top:16px"><h2>Chất lượng mô hình</h2><table id="mt"></table>
+<div class="n">Silhouette khoảng 0,29 cho thấy các cụm nằm trên một phổ hành vi liên tục, không tách biệt hoàn toàn; khách hàng gần ranh giới có thể được hai mô hình xếp khác nhau.</div></div>
+</div>
+<script>
+const M={"feats":[{"name":"BALANCE","lo":0.06510059,"hi":9338.804814000001,"log":true},{"name":"PURCHASES","lo":0.0,"hi":8977.290000000014,"log":true},{"name":"CASH_ADVANCE","lo":0.0,"hi":9588.163356800003,"log":true},{"name":"CREDIT_LIMIT","lo":500.0,"hi":17000.0,"log":true},{"name":"PAYMENTS","lo":0.0,"hi":13608.71554060002,"log":true},{"name":"PURCHASES_FREQUENCY","lo":0.0,"hi":1.0,"log":false},{"name":"CASH_ADVANCE_FREQUENCY","lo":0.0,"hi":0.833333,"log":false},{"name":"PRC_FULL_PAYMENT","lo":0.0,"hi":1.0,"log":false}],"mu":[6.160169,4.895139,3.315944,8.095916,6.620286,0.490351,0.134017,0.153715],"sd":[2.008025,2.909537,3.560668,0.810954,1.583024,0.401348,0.195539,0.292483],"pca":{"components":[[0.35678,-0.391458,0.507389,0.064557,0.082023,-0.383788,0.455579,-0.310297],[0.393144,0.395938,0.087488,0.465746,0.544457,0.373483,0.144111,0.086058],[-0.328006,-0.275819,0.137025,0.160921,0.254158,-0.212164,0.162943,0.797185],[-0.042886,-0.148757,-0.21122,0.815015,-0.193962,-0.322601,-0.31784,-0.156381],[0.238473,-0.221919,-0.258861,-0.277296,0.632886,-0.328476,-0.486754,-0.067898],[0.711091,-0.131875,0.047307,-0.059302,-0.430937,0.075918,-0.258757,0.461279]],"mean":[-0.0,-0.0,0.0,-0.0,-0.0,-0.0,-0.0,0.0],"ev":[0.3775,0.2466,0.1183,0.0913,0.0763,0.0403]},"km":{"centers":[[-1.11196,-1.76975,-0.27664,0.33675,-0.47942,-0.41456],[-0.85925,0.47749,-0.81893,0.09988,0.40645,-0.0086],[1.21517,1.53761,-0.25367,-0.44952,-0.69056,-0.16064],[2.15604,-0.69645,0.3866,0.06326,0.31991,0.13837],[-2.21804,0.43664,1.55889,-0.17681,-0.12602,0.38874]],"sizes":[1355,2624,1417,2269,1285]},"gmm":{"weights":[0.180647,0.137389,0.241213,0.124738,0.316012],"means":[[-0.8315,-1.6686,-0.10385,0.13062,-0.40504,-0.27343],[1.28855,1.65017,-0.21855,-0.44253,-0.72444,-0.18808],[2.20335,-0.57212,0.38316,0.09532,0.33301,0.12568],[-2.28128,0.57214,1.58686,-0.14908,-0.13327,0.44049],[-0.86623,0.44729,-0.76446,0.10382,0.34491,-0.03173]],"var":[1.080657,0.473146,0.430775,0.420582,0.441491],"sizes":[1511,1248,2187,1127,2877]},"gmap":[0,2,3,4,1],"presets":[{"BALANCE":24.48,"PURCHASES":90.0,"CASH_ADVANCE":0.0,"CREDIT_LIMIT":2500.0,"PAYMENTS":128.87,"PURCHASES_FREQUENCY":0.5,"CASH_ADVANCE_FREQUENCY":0.0,"PRC_FULL_PAYMENT":0.0},{"BALANCE":954.26,"PURCHASES":611.08,"CASH_ADVANCE":0.0,"CREDIT_LIMIT":3500.0,"PAYMENTS":795.0,"PURCHASES_FREQUENCY":0.83,"CASH_ADVANCE_FREQUENCY":0.0,"PRC_FULL_PAYMENT":0.0},{"BALANCE":2936.44,"PURCHASES":2177.32,"CASH_ADVANCE":1935.42,"CREDIT_LIMIT":5000.0,"PAYMENTS":1513.16,"PURCHASES_FREQUENCY":0.67,"CASH_ADVANCE_FREQUENCY":0.42,"PRC_FULL_PAYMENT":0.0},{"BALANCE":1307.18,"PURCHASES":0.0,"CASH_ADVANCE":435.24,"CREDIT_LIMIT":3000.0,"PAYMENTS":857.06,"PURCHASES_FREQUENCY":0.0,"CASH_ADVANCE_FREQUENCY":0.25,"PRC_FULL_PAYMENT":0.0},{"BALANCE":87.93,"PURCHASES":617.5,"CASH_ADVANCE":0.0,"CREDIT_LIMIT":4000.0,"PAYMENTS":740.05,"PURCHASES_FREQUENCY":0.83,"CASH_ADVANCE_FREQUENCY":0.0,"PRC_FULL_PAYMENT":0.82}],"pts":[[-1.13,-2.56,0,0],[-2.19,2.36,4,3],[2.68,0.73,3,2],[-0.59,-0.53,1,4],[-2.11,-1.59,0,0],[-1.28,-0.19,1,4],[-0.47,-0.65,1,4],[2.33,-0.05,3,2],[-1.19,-0.06,1,4],[1.09,0.3,2,1],[4.16,0.69,3,2],[-1.49,-0.1,1,4],[-0.71,0.73,1,4],[-0.54,-0.33,1,4],[-0.64,0.65,1,4],[2.94,2.84,2,1],[2.59,-0.6,3,2],[-2.28,-0.16,0,0],[-1.95,-1.96,0,0],[-1.5,-0.07,1,0],[-1.12,0.52,1,4],[-1.23,-0.05,1,4],[2.54,2.01,2,1],[2.96,0.33,3,2],[-1.91,-0.47,4,0],[0.91,1.57,2,1],[2.01,0.16,3,2],[-0.47,0.88,1,4],[2.2,3.97,2,1],[1.31,1.81,2,1],[-0.55,-0.75,1,4],[-0.03,-0.53,1,4],[-0.73,0.11,1,0],[3.06,-0.68,3,2],[-1.22,-3.67,0,0],[2.82,-0.98,3,2],[0.92,2.36,2,1],[-1.17,0.87,1,4],[-0.76,0.39,1,4],[-0.63,1.42,1,4],[1.35,0.56,3,2],[2.2,0.14,3,2],[0.11,1.5,2,1],[-0.91,-0.03,1,4],[-2.17,1.13,1,4],[-1.92,-1.34,4,0],[-0.94,3.05,1,4],[1.28,-0.62,3,2],[2.92,-2.39,3,0],[-0.73,-2.71,0,0],[-0.85,-0.53,1,4],[1.6,-1.58,3,2],[-1.69,-1.19,0,0],[-1.11,-2.37,0,0],[-1.19,1.12,1,4],[2.02,-0.88,3,2],[1.1,-0.19,3,2],[0.93,0.06,3,2],[2.06,0.2,3,2],[0.8,1.71,2,1],[-0.18,1.82,1,4],[1.84,1.94,2,1],[-1.04,-0.9,1,4],[1.36,-1.26,3,2],[2.23,2.97,2,1],[2.22,-0.54,3,2],[-1.6,-3.84,0,0],[-2.9,-0.72,4,3],[-2.89,-1.06,4,3],[2.2,-0.47,3,2],[-2.61,1.2,4,3],[-0.31,0.52,1,4],[-1.26,-3.73,0,0],[0.13,1.36,2,4],[-2.4,-0.66,4,3],[2.36,-1.25,3,2],[-0.97,-1.64,0,0],[-1.02,2.36,1,4],[2.46,0.28,3,2],[-0.92,1.69,1,4],[-1.23,-0.42,1,4],[2.78,0.24,3,2],[0.61,2.52,2,1],[-1.0,0.29,1,4],[1.2,2.37,2,1],[-0.52,-1.22,1,4],[-1.29,-1.49,0,0],[1.38,-2.77,3,0],[1.41,-0.68,3,2],[-1.32,1.84,1,4],[-1.86,-0.57,1,4],[1.59,-1.42,3,2],[-2.1,-1.27,4,0],[-1.75,0.02,4,3],[0.51,-1.09,3,0],[-1.53,0.77,1,4],[3.3,1.64,2,1],[2.11,-0.26,3,2],[2.14,-0.47,3,2],[-0.92,0.94,1,4],[-1.78,1.63,1,4],[-2.14,-0.23,0,0],[1.88,-0.06,3,2],[-1.32,0.5,1,4],[2.15,-2.02,3,2],[-2.12,-0.73,4,3],[-2.19,-0.62,0,0],[-2.43,2.46,4,3],[-1.09,1.32,1,4],[3.57,0.53,3,2],[1.93,-1.02,3,2],[-0.86,1.56,1,4],[-0.64,-0.62,1,4],[-1.76,-0.47,4,3],[0.57,1.57,2,1],[1.76,2.19,2,1],[-0.99,0.14,4,3],[2.23,-1.3,3,2],[-2.52,1.93,4,3],[0.81,-3.71,0,0],[-1.38,1.92,4,3],[3.12,1.05,3,2],[-1.2,0.71,1,4],[2.57,0.12,2,2],[-2.81,0.34,4,3],[-0.93,-0.73,1,4],[-2.49,-0.38,4,3],[2.05,1.63,2,1],[0.96,-2.08,3,2],[2.89,-1.1,3,2],[-0.3,0.47,1,4],[1.74,-1.18,3,2],[-1.32,-0.24,1,4],[-1.07,0.5,1,4],[-0.98,-2.66,0,0],[-2.58,-1.79,4,0],[-0.11,-0.25,1,4],[0.42,1.22,2,1],[1.03,-0.3,3,2],[-1.13,-1.89,0,0],[0.87,0.59,2,4],[-1.74,-0.62,4,3],[-0.94,-2.44,0,0],[-2.84,-0.5,4,3],[-0.84,1.59,1,4],[1.27,1.35,2,1],[-2.21,2.51,4,3],[-0.13,0.27,1,4],[0.5,0.23,1,4],[-0.96,0.4,1,4],[0.51,2.64,2,1],[3.02,0.08,3,2],[2.32,-1.07,3,2],[1.49,0.66,2,2],[4.23,0.52,3,2],[-1.05,-2.45,0,0],[-2.1,-0.72,0,0],[1.65,-1.35,3,2],[2.26,-1.42,3,2],[2.37,2.04,2,1],[-1.16,1.39,1,4],[-2.45,-0.3,4,3],[-2.25,-2.14,0,0],[-1.03,-1.21,0,4],[1.16,2.56,2,1],[-1.99,-1.46,0,0],[0.34,0.83,2,4],[-1.29,0.49,4,0],[2.12,1.55,2,1],[-2.2,-0.87,4,3],[-0.99,2.47,1,4],[-0.12,0.4,1,4],[1.1,-0.11,3,2],[-1.35,1.28,1,4],[-1.66,1.23,1,4],[2.07,-0.07,3,2],[-1.02,-2.53,0,0],[-0.72,-1.81,0,0],[-2.51,0.73,4,3],[2.12,-0.78,3,2],[0.97,2.62,2,1],[-1.48,0.31,4,3],[-2.3,2.26,4,3],[0.17,0.99,2,4],[-2.72,-0.34,4,3],[-1.06,-1.07,1,4],[1.25,0.09,2,1],[1.03,-0.39,3,2],[-1.02,2.41,1,4],[1.09,2.11,2,1],[3.15,-0.31,3,2],[0.08,-0.41,1,4],[-0.65,-0.58,1,4],[2.03,-0.37,3,2],[1.35,-2.38,3,2],[0.18,0.92,1,4],[1.36,2.99,2,1],[2.96,0.54,3,2],[-0.69,-1.67,0,0],[1.68,-1.88,3,2],[-0.54,-1.08,1,4],[-2.61,1.29,4,3],[-1.13,-4.03,0,0],[3.35,-0.49,3,2],[-0.68,2.95,4,3],[-2.15,0.84,4,3],[3.86,0.72,3,2],[2.14,-0.07,3,2],[1.29,-3.02,0,0],[0.03,-0.11,1,4],[3.2,0.31,3,2],[-0.99,1.5,1,4],[1.9,-1.32,3,2],[-0.79,3.35,4,3],[0.68,-0.29,3,2],[1.65,0.4,3,2],[-0.11,-4.93,0,0],[-2.46,1.19,4,3],[-2.3,-0.58,0,0],[1.95,0.9,2,1],[0.0,-0.61,0,4],[0.47,0.23,2,4],[-0.25,-1.6,0,0],[-1.22,-0.34,0,4],[-1.18,1.41,1,4],[-2.64,1.37,4,3],[-2.11,-1.08,0,0],[1.78,1.25,2,1],[-1.56,-0.6,0,4],[-0.7,1.3,1,4],[2.56,-0.67,3,2],[4.34,1.2,3,2],[-1.3,0.93,1,4],[-0.22,0.29,1,4],[2.2,-0.59,3,2],[1.55,-1.71,3,2],[-1.83,-0.5,4,3],[3.41,0.29,3,2],[-1.28,-1.69,0,0],[-0.46,-0.48,1,4]],"mx":[9339,8977,9588,17000,13609,1,1,1],"medians":[[24.46,166.63,0.0,2000.0,186.81,0.33,0.0,0.0],[988.13,889.83,0.0,3000.0,1025.32,0.79,0.0,0.0],[2755.31,814.66,1949.23,6000.0,1850.33,0.7,0.33,0.0],[1484.22,0.0,1188.13,3000.0,762.56,0.0,0.25,0.0],[81.09,888.85,0.0,4000.0,1057.65,0.92,0.0,0.83]],"metrics":{"kmeans":{"sil":0.2867685043926023,"db":1.2435385126029324,"ch":3236.332838378412,"ari":0.9769876953888484},"gmm":{"sil":0.28116371368073795,"db":1.289131607032403,"ch":3061.3185701191596,"ari":0.9664614921780388},"agree_ari":0.8270691334495032,"n":8950}};
+const N=["Ít hoạt động","Chi tiêu đều đặn","Hạn mức cao, mua sắm và rút tiền","Chuyên rút tiền mặt","Chi tiêu chủ động, trả đủ nợ"];
+const S=["Ít hoạt động","Đều đặn","Hạn mức cao","Rút tiền mặt","Trả đủ nợ"];
+const D=["Số dư thấp, mua sắm ít và hầu như không ứng tiền mặt.","Mua sắm thường xuyên, dư nợ vừa phải, ít dùng tiền mặt.","Hạn mức và số dư lớn; vừa mua sắm vừa ứng tiền mặt nhiều.","Gần như không mua sắm; chủ yếu ứng tiền mặt và giữ dư nợ.","Mua sắm nhiều nhưng thanh toán đủ gần như mọi kỳ."];
+const C=["#8a94a6","#2f7cf6","#e8890c","#e5484d","#2bb673"];
+const L=["Số dư (BALANCE)","Tổng chi tiêu (PURCHASES)","Ứng tiền mặt (CASH_ADVANCE)","Hạn mức tín dụng (CREDIT_LIMIT)","Tổng thanh toán (PAYMENTS)","Tần suất mua sắm (0–1)","Tần suất ứng tiền mặt (0–1)","Tỷ lệ trả đủ (0–1)"];
+const F=new Intl.NumberFormat("vi-VN",{maximumFractionDigits:2});
+let x=Object.values(M.presets[1]);
+const $=id=>document.getElementById(id);
+$("nn").textContent=F.format(M.metrics.n);
+function proj(v){const z=M.feats.map((f,i)=>{let a=Math.min(Math.max(v[i],f.lo),f.hi);if(f.log)a=Math.log1p(a);return(a-M.mu[i])/M.sd[i]});
+return M.pca.components.map(c=>c.reduce((s,w,i)=>s+w*(z[i]-M.pca.mean[i]),0))}
+function km(p){let b=0,bd=1e99;M.km.centers.forEach((c,k)=>{const d=c.reduce((s,a,i)=>s+(a-p[i])**2,0);if(d<bd){bd=d;b=k}});return b}
+function gm(p){const G=M.gmm,d=p.length;const l=G.weights.map((w,k)=>Math.log(w)-.5*d*Math.log(2*Math.PI*G.var[k])-G.means[k].reduce((s,a,i)=>s+(a-p[i])**2,0)/(2*G.var[k]));
+const m=Math.max(...l),e=l.map(a=>Math.exp(a-m)),s=e.reduce((a,b)=>a+b);return e.map(a=>a/s)}
+function build(){const fr=[5,6,7];$("inp").innerHTML=M.feats.map((f,i)=>{const isf=fr.includes(i),mx=isf?1:M.mx[i],st=isf?.01:Math.max(1,Math.round(mx/300));
+return `<div class="f"><label>${L[i]}<input type="number" id="n${i}" min="0" step="${st}" value="${x[i]}"></label><input type="range" id="r${i}" min="0" max="${mx}" step="${st}" value="${x[i]}"></div>`}).join("");
+M.feats.forEach((f,i)=>{const n=$("n"+i),r=$("r"+i);n.oninput=()=>{x[i]=parseFloat(n.value)||0;r.value=x[i];run()};r.oninput=()=>{x[i]=parseFloat(r.value);n.value=x[i];run()}});
+$("pr").innerHTML="<span class='sub' style='margin:5px 4px 0 0'>Mẫu:</span>"+S.map((s,k)=>`<button data-k="${k}">${s}</button>`).join("");
+$("pr").querySelectorAll("button").forEach(b=>b.onclick=()=>{x=Object.values(M.presets[+b.dataset.k]);build();run()})}
+function run(){const p=proj(x),k=km(p),g=gm(p),gi=g.indexOf(Math.max(...g)),gk=M.gmap[gi],gc=Math.max(...g);
+$("res").innerHTML=`<div class="b" style="border-left-color:${C[k]}"><small>K-Means</small><strong>${N[k]}</strong><p>${D[k]}</p></div>
+<div class="b" style="border-left-color:${C[gk]}"><small>GMM · độ chắc chắn ${F.format(gc*100)}%</small><strong>${N[gk]}</strong>
+${g.map((v,j)=>`<div class="pb"><span>${S[M.gmap[j]]}</span><i><b style="width:${v*100}%;background:${C[M.gmap[j]]}"></b></i><span>${F.format(v*100)}%</span></div>`).join("")}</div>`;
+$("ag").innerHTML=gk===k?`<span class="tag">Hai mô hình đồng thuận</span>`:`<span class="tag">Hai mô hình khác nhau: khách hàng nằm gần ranh giới giữa hai phân khúc</span>`;
+chart(p,k);cards(k)}
+function chart(p,k){const W=520,H=330,m=28,pts=M.pts,xs=pts.map(a=>a[0]).concat(p[0]),ys=pts.map(a=>a[1]).concat(p[1]);
+const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+const X=v=>m+(v-x0)/(x1-x0)*(W-2*m),Y=v=>H-m-(v-y0)/(y1-y0)*(H-2*m);
+$("sv").innerHTML=`<svg viewBox="0 0 ${W} ${H}"><line x1="${m}" y1="${H-m}" x2="${W-m}" y2="${H-m}" stroke="currentColor" opacity=".25"/><line x1="${m}" y1="${m}" x2="${m}" y2="${H-m}" stroke="currentColor" opacity=".25"/>
+<text x="${W/2}" y="${H-6}" font-size="11" text-anchor="middle" fill="currentColor" opacity=".6">PC1 (${F.format(M.pca.ev[0]*100)}% phương sai)</text><text x="10" y="${H/2}" font-size="11" fill="currentColor" opacity=".6" transform="rotate(-90 10 ${H/2})" text-anchor="middle">PC2 (${F.format(M.pca.ev[1]*100)}%)</text>
+${pts.map(a=>`<circle cx="${X(a[0])}" cy="${Y(a[1])}" r="3" fill="${C[a[2]]}" opacity=".5"/>`).join("")}
+<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="9" fill="${C[k]}" stroke="#fff" stroke-width="2.5"/><circle cx="${X(p[0])}" cy="${Y(p[1])}" r="13" fill="none" stroke="${C[k]}" stroke-width="1.5"/></svg>`}
+function cards(k){$("sg").innerHTML=N.map((n,i)=>{const d=M.medians[i];return `<div class="sc${i===k?" on":""}" style="border-top-color:${C[i]}"><strong>${n}</strong>${F.format(M.km.sizes[i]/M.metrics.n*100)}% khách hàng<br>${D[i]}<br>Trung vị: chi tiêu ${F.format(d[1])} · ứng tiền ${F.format(d[2])} · hạn mức ${F.format(d[3])} · trả đủ ${F.format(d[7]*100)}%</div>`}).join("")}
+const q=M.metrics;$("mt").innerHTML="<tr><th>Mô hình</th><th>Silhouette</th><th>Davies–Bouldin</th><th>Calinski–Harabasz</th><th>Độ ổn định (ARI)</th></tr>"+
+[["K-Means",q.kmeans],["GMM (spherical)",q.gmm]].map(([n,m])=>`<tr><td>${n}</td><td>${m.sil.toFixed(3)}</td><td>${m.db.toFixed(3)}</td><td>${F.format(m.ch)}</td><td>${m.ari.toFixed(3)}</td></tr>`).join("")+
+`<tr><td>Đồng thuận K-Means–GMM (ARI)</td><td colspan="4">${q.agree_ari.toFixed(3)}</td></tr>`;
+build();run();
+</script></body></html>
