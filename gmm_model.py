@@ -17,7 +17,7 @@ COVARIANCE_TYPES = (
     "spherical"
 )
 def evaluate_gmm_components(X_pca, min_components=2, max_components=12):
-    """Quét BIC/AIC đến K=12 và nhận diện cực tiểu nội bộ."""
+    """Quét BIC/AIC đến K=max_components và nhận diện cực tiểu nội bộ."""
     n_samples = len(X_pca)
     if n_samples < 3:
         raise ValueError("Cần ít nhất 3 khách hàng để đánh giá.")

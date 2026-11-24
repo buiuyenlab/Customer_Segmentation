@@ -166,10 +166,12 @@ def main():
         "so sánh trên cùng K."
     )
 
-    # 3. Quét BIC đến K=12; huấn luyện GMM tại cùng K để so sánh công bằng.
+    # 3. Quét BIC đến K=GMM_MAX_K; huấn luyện GMM tại cùng K để so sánh
+    # công bằng.
     print("\n[3] QUÉT GMM TRÊN X_pca")
+    GMM_MAX_K = 15
     gmm_results = evaluate_gmm_components(
-        X_pca, min_components=2, max_components=15
+        X_pca, min_components=2, max_components=GMM_MAX_K
     )
     scan_minimum = gmm_results["best_config"]
     gmm_config = select_gmm_config_for_k(gmm_results, selected_k)
@@ -190,7 +192,10 @@ def main():
         f"K={scan_minimum['n_components']} "
         f"({scan_minimum['covariance_type']}, "
         f"BIC={scan_minimum['bic']:.2f})"
-        + (" ở biên K=12." if scan_minimum["at_search_boundary"] else ".")
+        + (
+            f" ở biên K={GMM_MAX_K}."
+            if scan_minimum["at_search_boundary"] else "."
+        )
     )
     if gmm_results["local_minima"]:
         minima_text = "; ".join(
@@ -201,7 +206,7 @@ def main():
         print("Cực tiểu nội bộ BIC:", minima_text)
     else:
         print(
-            "Không thấy cực tiểu nội bộ BIC trong K=2..15; "
+            f"Không thấy cực tiểu nội bộ BIC trong K=2..{GMM_MAX_K}; "
             "không diễn giải giá trị K tại biên là số cụm tối ưu."
         )
     gmm_model, gmm_labels, probabilities, confidence = train_gmm(

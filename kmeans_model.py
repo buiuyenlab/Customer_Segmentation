@@ -14,7 +14,7 @@ def evaluate_clusters(
     """Quét K và chọn theo thứ hạng đa chỉ số, không chỉ Silhouette."""
     n_samples = len(X_pca)
     if n_samples < 4:
-        raise ValueError("Cần ít nhất 3 khách hàng để đánh giá.")
+        raise ValueError("Cần ít nhất 4 khách hàng để đánh giá.")
     max_k = min(max_k, n_samples - 1)
 
     results = {
@@ -104,7 +104,12 @@ def evaluate_clusters(
 
 
 def train_kmeans(X_pca, results=None, n_clusters=None, random_state=42):
-    """Huấn luyện K-Means với K thủ công hoặc tối ưu theo Silhouette."""
+    """Huấn luyện K-Means với K thủ công hoặc K tốt nhất từ quét K.
+
+    K tốt nhất (results["best_k"]) được chọn theo thứ hạng trung bình
+    Silhouette/Davies-Bouldin/Calinski-Harabasz, có ràng buộc tỷ lệ cụm
+    nhỏ nhất.
+    """
     if n_clusters is None:
         if results is None or not results.get("k"):
             raise ValueError("Cần kết quả quét K để tự chọn số cụm.")

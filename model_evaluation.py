@@ -97,6 +97,7 @@ def evaluate_stability(
                 n_init=10,
                 max_iter=500,
                 init_params="kmeans",
+                tol=1e-3,
                 random_state=random_state
             )
 

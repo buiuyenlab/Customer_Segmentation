@@ -1,5 +1,10 @@
-pandas
-numpy
-matplotlib
-seaborn
-scikit-learn
+# Phiên bản đã dùng để tạo kết quả trong results/ (Python 3.14)
+pandas==3.1.0
+numpy==2.5.4
+matplotlib==3.11.2
+seaborn==0.13.2
+scikit-learn==1.9.1
+scipy==1.18.1
+
+# Tùy chọn: vẽ thêm biểu đồ UMAP (results/plots/clusters_umap.png)
+# umap-learn
