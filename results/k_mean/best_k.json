@@ -1,0 +1,8 @@
+{
+  "best_k": 5,
+  "k_min": 4,
+  "scan_min": 2,
+  "k_max": 10,
+  "min_cluster_share": 0.05,
+  "criterion": "Thứ hạng trung bình Silhouette/Davies-Bouldin/Calinski-Harabasz, có ràng buộc cụm nhỏ nhất"
+}

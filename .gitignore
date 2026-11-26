@@ -19,3 +19,7 @@ env/
 # Temporary files
 *.log
 .DS_Store
+
+# Sinh ra khi chạy pipeline trong src/ (chạy lại để tạo)
+data/processed/
+models/

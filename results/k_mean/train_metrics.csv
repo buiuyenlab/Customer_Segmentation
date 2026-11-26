@@ -1,0 +1,2 @@
+﻿Number_of_Customers,Number_of_Clusters,Silhouette,Davies_Bouldin,Calinski_Harabasz,Min_Cluster_Share,Max_Cluster_Share,Model,Split,Stability_ARI_Mean,Stability_ARI_Std
+7160,5,0.28411882116347653,1.2487460093185452,2574.166182500439,0.1430167597765363,0.296927374301676,K-Means,Train,0.9717932282918108,0.010978504301188756

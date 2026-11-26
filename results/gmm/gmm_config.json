@@ -1,0 +1,24 @@
+{
+  "n_components": 5,
+  "covariance_type": "spherical",
+  "rule": "silhouette",
+  "bic": 113095.02627799434,
+  "aic": 112826.85193285611,
+  "silhouette": 0.2782125066162346,
+  "bic_best_covariance_type": "full",
+  "bic_best_at_k": 55941.28309421054,
+  "k_source": "cùng K với K-Means để so sánh công bằng",
+  "bic_scan_minimum": {
+    "n_components": 14,
+    "covariance_type": "full",
+    "bic": 37228.13508535915,
+    "at_search_boundary": false
+  },
+  "bic_local_minima": [
+    {
+      "n_components": 14,
+      "covariance_type": "full",
+      "bic": 37228.13508535915
+    }
+  ]
+}
